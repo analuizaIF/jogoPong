@@ -1,6 +1,5 @@
 package jogoPong;
 
-//Importações necessárias para gráficos, multithread e outros.
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 
@@ -8,105 +7,119 @@ import jogoPong.display.Display;
 import jogoPong.input.KeyManager;
 import jogoPong.states.StateManager;
 
+/*/
+ * É a classe principal que gerencia o ciclo de vida do jogo, incluindo inicialização, 
+ * atualização e renderização.Também cuida da criação do display gráfico, dos gerenciadores 
+ * de estados e teclas, e da definição do estado inicial do jogo.
+ */
 
-public class Game implements Runnable { // Essa classe é o "coração" do jogo, que cuida de inicializar e rodar tudo.
+public class Game implements Runnable { 
+	public static final int width = 800, height = 600; 
 	
-	private Display display; // Janela do jogo
-	private Thread thread;  //Para rodar o jogo em paralelo (multithreading)
-	private boolean running = false; // Indica se o jogo está em execução ou não
-	
-	public static final int width = 400, height = 300; // Tamanho da tela do jogo
-	
-	private StateManager sm; // Gerenciador de estados do jogo (menu, gameplay, etc.)
-	private KeyManager km;  // Gerenciador de entradas do teclado
-	
-	// Construtor do jogo: Inicializa os componentes básicos
-	public Game() {
-		display = new Display("Pong", width, height);  // Cria a janela com título e dimensões
-		sm = new StateManager();  // Cria o gerenciador de estados
-		km = new KeyManager();  // Cria o gerenciador de teclas
-		display.setKeyListener(sm); // Adiciona o gerenciador de estados como escutador de teclado
-		display.setKeyListener(km);  // Adiciona o gerenciador de teclas como escutador de teclado
+	private Display display; 
+	private Thread thread;  
+	private boolean running = false; 
 		
-		StateManager.setState(StateManager.MENU);  // Define o estado inicial como o menu
+	private StateManager sm; 
+	private KeyManager km; 
+	
+
+	public Game() {
+		display = new Display("Pong Game", width, height);  
+		//Cria o gerenciador de estados
+		sm = new StateManager(); 
+		//Cria o gerenciador de teclas
+		km = new KeyManager();
+		//teclado
+		display.setKeyListener(sm);
+		display.setKeyListener(km);  
+		
+		//Define o estado inicial como o menu
+		StateManager.setState(StateManager.MENU);  
 	}
 
 	@Override
-	public void run() { // Esse método é chamado quando a Thread é iniciada
-		init();  // Inicializações adicionais (vazia aqui, mas pode ser usada futuramente)
+	public void run() { 
+		init();  
 		
-		int FPS = 60; // Define o número de frames por segundo
-		double timePerTick = 1000000000/60; // Quanto tempo dura um frame
-		double delta = 0;  // Acumula o tempo para controlar os frames
+		// Define o número de frames por segundo
+		int FPS = 60; 
+		double timePerTick = 1000000000/60; 
+		double delta = 0; 
 		long now;
-		long lastTime = System.nanoTime(); // Pega o tempo atual em nanossegundos
+		long lastTime = System.nanoTime(); 
 		
 		// Loop principal do jogo
 		while(running) {
-			now = System.nanoTime();  // Pega o tempo atual
-			delta += (now -lastTime)/ timePerTick; // Calcula quanto tempo se passou
-			lastTime = now;  // Atualiza o último tempo
+			now = System.nanoTime();  
+			delta += (now - lastTime) / timePerTick; 
+			lastTime = now;  
 			
-			if (delta >= 1) {  // Se passou o tempo necessário para um frame...
-				update();  // Atualiza a lógica do jogo
-				render(); // Desenha o jogo na tela
-				delta--;  // Reduz o tempo acumulado
+			if (delta >= 1) {
+				//Atualiza a lógica do jogo
+				update();
+				//Desenha o jogo na tela
+				render(); 
+				delta--; 
 			}
-			
 		}
-		stop();  // Para a execução quando `running` for falso
+		
+		stop();	
+	}
+	
+	private void init() {	
 		
 	}
 	
-	private void init() {
-	// Método vazio por enquanto, mas poderia ser usado para inicializar coisas adicionais.	
-	}
-	
-	// Atualiza a lógica do jogo	
+	/*/
+	 * atualiza
+	 */
 	private void update() { 
-		if (StateManager.getState() ==null) return; // Se não há estado ativo, não faz nada
-			sm.update();  // Atualiza o estado ativo
-			km.update();  // Atualiza o gerenciador de teclas
-			
-		
+		if (StateManager.getState() == null) return; 
+			sm.update();  
+			km.update();  
 	}
 	
-	// Cuida da renderização dos gráficos na tela
+	//renderização dos gráficos na tela
 	private void render() {
-		BufferStrategy bs = display.getBufferStrategy(); // Garante que os gráficos sejam processados suavemente
-		if (bs ==null) {  // Se ainda não existe um buffer...
-			display.createBufferStrategy();  // Cria um buffer
-			bs = display.getBufferStrategy(); // Pega o novo buffer
+		BufferStrategy bs = display.getBufferStrategy(); 
+		if (bs == null) { 
+			display.createBufferStrategy(); 
+			bs = display.getBufferStrategy();
 		}
 		
-		Graphics g = bs.getDrawGraphics();  // Objeto usado para desenhar na tela
-		g.clearRect(0, 0, width, height);  // Limpa a tela para evitar borrões
+		Graphics g = bs.getDrawGraphics();
+		g.clearRect(0, 0, Game.width, Game.height); 
 		
 		if (StateManager.getState()!=null) {
-			sm.render(g);  // Desenha o estado atual
+			sm.render(g); 
 		}
 		
-		g.dispose(); // Libera os recursos gráficos
-		bs.show();  // Mostra o que foi desenhado
+		g.dispose();
+		bs.show(); 
 					
 	}
 
-	// Método que inicia o jogo
+	/*/
+	 * METODO: inicializa jogo
+	 */
 	public synchronized void start() {
-		if (thread != null) return;  // Se já existe uma Thread rodando, não faz nada
-		thread = new Thread (this);  // Cria uma nova Thread
-		thread.start(); // Inicia a Thread, chamando o método `run()`
-		running = true; // Define que o jogo está rodando
+		if (thread != null) return;  
+		thread = new Thread (this); 
+		thread.start(); 
+		running = true; 
 		
 	}
 	
-	// Método que para o jogo
+	/*/
+	 * METODO: finaliza/Para jogo
+	 */
 	public synchronized void stop() {
-		if (thread ==null) return; // Se não existe uma Thread, não faz nada
+		if (thread == null) return; 
 		try {
-			thread.join(); // Aguarda a Thread finalizar
+			thread.join(); 
 		} catch (InterruptedException e) {
-			e.printStackTrace();  // Mostra o erro no console, se houver
+			e.printStackTrace();
 		}
 		
 	}

@@ -6,6 +6,12 @@ import java.awt.Graphics;
 
 import jogoPong.Game;
 
+/*/
+ * Representa um estado do jogo que exibe os "Ticks por Segundo" (TPS), 
+ * uma métrica usada para medir o desempenho
+ * e a responsividade do loop principal do jogo.
+ */
+
 public class FPSState implements State {
 	private long now, lastTime = System.nanoTime();
 	private double timer = 0;
@@ -14,19 +20,24 @@ public class FPSState implements State {
 
 	@Override
 	public void init() {
-		// TODO Auto-generated method stub
-
+		
 	}
 
+	/*/
+	 * METODO: definindo tempo
+	 */
 	@Override
 	public void update() {
-		now =System.nanoTime();
+		now = System.nanoTime();
 		timer += now - lastTime;
 		lastTime = now;
 		tick++;
 
 	}
 
+	/*/
+	 * ESTILIZACOES
+	 */
 	@Override
 	public void render(Graphics g) {
 		g.setColor(Color.BLACK);
@@ -43,21 +54,16 @@ public class FPSState implements State {
 		g.setFont(font);
 		
 		String text = "TPS:" + t;
-		g.drawString(text, g.getFontMetrics().stringWidth(text),
-				g.getFontMetrics(font).getHeight());
-
+		g.drawString(text, g.getFontMetrics().stringWidth(text), g.getFontMetrics(font).getHeight());
 	}
 
 	@Override
 	public void KeyPressed(int cod) {
-		System.out.println("Press"+cod);
 		
 	}
 
 	@Override
 	public void KeyReleased(int cod) {
-		System.out.println("Release"+cod);
 		
 	}
-
 }

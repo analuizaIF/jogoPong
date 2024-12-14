@@ -1,6 +1,5 @@
 package jogoPong.display;
 
-//Importação de bibliotecas necessárias
 import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.event.KeyListener;
@@ -9,52 +8,47 @@ import java.awt.image.BufferStrategy;
 import javax.net.ssl.KeyManager;
 import javax.swing.JFrame;
 
+/*/
+ * Gerencia a interface gráfica do jogo, incluindo a criação da janela principal 
+ * (JFrame) e o painel de desenho (Canvas), usado para renderização.
+ */
 
 public class Display {
-	private JFrame jframe; // Janela principal do jogo
-	private Canvas canvas; // Área de desenho onde o jogo será renderizado
+	private JFrame jframe; 
+	private Canvas canvas; 
 	
-	// Construtor: Inicializa a janela e o canvas
+	/*/
+	 * CONSTRUTOR: configuracoes de Frame e Painel
+	 */
 	public Display(String title, int width, int height){
-		canvas = new Canvas(); // Cria o Canvas
-		canvas.setPreferredSize(new Dimension(width, height)); // Define o tamanho preferido
-		canvas.setMaximumSize(new Dimension(width, height));  // Define o tamanho máximo
-		canvas.setMinimumSize(new Dimension(width, height));   // Define o tamanho mínimo
+		canvas = new Canvas(); 
+		canvas.setPreferredSize(new Dimension(width, height)); 
+		canvas.setMaximumSize(new Dimension(width, height));  
+		canvas.setMinimumSize(new Dimension(width, height)); 
 		
-		jframe = new JFrame(title); // Cria a janela com o título fornecido
-		jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // Fecha a aplicação ao clicar no "X"
-		jframe.setResizable(false);  // Evita redimensionamento da janela
+		jframe = new JFrame(title); 
+		jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  
+		jframe.setResizable(false); 
 		
-		canvas.setFocusable(false);  // O foco do teclado será no JFrame, não no Canvas
-		jframe.add(canvas);  // Adiciona o Canvas na janela
-		jframe.pack();  // Ajusta o tamanho da janela para o Canvas
+		canvas.setFocusable(false); 
+		jframe.add(canvas);  
+		jframe.pack(); 
 		
-		
-		jframe.setLocationRelativeTo(null);  // Centraliza a janela na tela
-		jframe.setVisible(true);  // Torna a janela visível
-		
+		jframe.setLocationRelativeTo(null);  
+		jframe.setVisible(true);
 	}
 	
-	// Retorna a estratégia de buffer do Canvas
+	//Retorna a estratégia de buffer do Canvas
 	public BufferStrategy getBufferStrategy() {
 		return canvas.getBufferStrategy();
 	}
 	
-	 // Cria a estratégia de buffer do Canvas
 	public void createBufferStrategy() {
 		canvas.createBufferStrategy(3);
 	}
 	
-	 // Adiciona um KeyListener à janela
 	public void setKeyListener(KeyListener kl) {
 		jframe.addKeyListener(kl);
-	}
-
-	//vazio por enquanto.
-	public void setKeyListener(KeyManager km) {
-		// TODO Auto-generated method stub
-		
-	}
-	
+	}	
 }
 
