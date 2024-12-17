@@ -125,8 +125,8 @@ public class MenuState implements State {
     private void select() {
         switch (choice) {
             case 0:
-                StateManager.setState(StateManager.LEVEL1); // START
-                break;
+            	 StateManager.setState(StateManager.LEVEL1);
+                 break;
             case 1:
                 StateManager.setState(StateManager.HELP); // HELP
                 break;

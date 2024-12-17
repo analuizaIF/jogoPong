@@ -48,7 +48,7 @@ public class HelpState implements State {
         // Título "HELP"
         g.setColor(new Color(255, 183, 3));
         g.setFont(font1);
-        g.drawString("INFORMATIVOS", Game.width / 2 - g.getFontMetrics().stringWidth("INFORMATIVOS") / 2, 130);
+        g.drawString("COMO JOGAR", Game.width / 2 - g.getFontMetrics().stringWidth("COMO JOGAR") / 2, 130);
 
         /*/
          * MATRIZ: Texto formatado
@@ -100,8 +100,8 @@ public class HelpState implements State {
         );
 
         g.drawString(
-            "Divirta-se jogando Pong!", 
-            Game.width / 2 - g.getFontMetrics().stringWidth("Divirta-se jogando Pong!") / 2, 
+            "Divirta-se jogando PONG!", 
+            Game.width / 2 - g.getFontMetrics().stringWidth("Divirta-se jogando PONG!") / 2, 
             instructionY + lineSpacing
         );
     }

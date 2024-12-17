@@ -91,7 +91,7 @@ public class Game implements Runnable {
 		Graphics g = bs.getDrawGraphics();
 		g.clearRect(0, 0, Game.width, Game.height); 
 		
-		if (StateManager.getState()!=null) {
+		if (StateManager.getState()!= null) {
 			sm.render(g); 
 		}
 		

@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Random;
 
+import javax.swing.JOptionPane;
+
 import jogoPong.Game;
 import jogoPong.input.KeyManager;
 
@@ -21,11 +23,14 @@ public class LevelState implements State {
 
     private Rectangle ball = new Rectangle(Game.width / 2 - 5, Game.height / 2 - 5, 10, 10); 
     //x, y, width, height
-    private Rectangle p1 = new Rectangle(22, 100, 20, 150); //raquete player 1
-    private Rectangle p2 = new Rectangle(763, 100, 20, 150); //raquete player 2 
+    private Rectangle raquete1 = new Rectangle(22, 100, 20, 150); //raquete player 1
+    private Rectangle raquete2 = new Rectangle(763, 100, 20, 150); //raquete player 2 
 
-    private double movex = 1.25, movey = 1.25; //VELOCIDADE 
+    //Movimentos na tela
+    private double movex = 2.3, movey = 2.3;
     private int score1 = 0, score2 = 0;
+    private static final int SCORE_LIMIT = 11; //Limite de DEZ (10) pontos marcados (valor vetorizado)
+
 
     private Font fontScore;
 
@@ -43,6 +48,8 @@ public class LevelState implements State {
             e.printStackTrace();
             fontScore = new Font("Dialog", Font.PLAIN, 24); 
         }
+        
+        start();
     }
 
     /*
@@ -53,10 +60,21 @@ public class LevelState implements State {
         ball.x = (Game.width - 40) / 2; 
         ball.y = (Game.height - 40) / 2;
 
-        //Direção aleatória
-        Random r = new Random();
-        movex = (r.nextInt(2) == 0) ? 2 : -2; 
-        movey = (r.nextInt(2) == 0) ? 2 : -2;  
+     // Velocidade inicial fixa, mas com direção aleatória
+        movex = (new Random().nextBoolean()) ? 3.0 : -3.0;
+        movey = (new Random().nextBoolean()) ? 2.5 : -2.5;
+
+    }
+
+    /*/
+     * METODO: controle de velocidade da bola
+     */
+    private void increaseSpeed() {
+    	//Maxima velocidade
+    	double maxSpeed = 5.0;
+    	//Aumenta velocidade em 10%
+        if (Math.abs(movex) < maxSpeed) movex *= 1.1;
+        if (Math.abs(movey) < maxSpeed) movey *= 1.1;
     }
 
 
@@ -72,70 +90,109 @@ public class LevelState implements State {
 
         //Movimentos do Jogador 1 (teclas W e S)
         if (KeyManager.w)
-            p1.y -= 8;      
+            raquete1.y -= 8;      
         if (KeyManager.s)
-            p1.y += 8;
+            raquete1.y += 8;
 
         //Movimentos do Jogador 2 (setas para cima e para baixo)
         if (KeyManager.up)
-            p2.y -= 8;   
+            raquete2.y -= 8;   
         if (KeyManager.down)
-            p2.y += 8; 
+            raquete2.y += 8; 
 
         limitsPlayers();
     }
 
     /*
-     * MÉTODO: Restringe os movimentos das raquetes para dentro da tela
+     * MÉTODO: Restringe os movimentos das raquetes para dentro da tela 
      */
     private void limitsPlayers() {
-        //Limites para o Jogador 1
-        if (p1.y < 0) p1.y = 0;       
-        if (p1.y > Game.height - p1.height)
-            p1.y = Game.height - p1.height; 
+    	/*/
+    	 * Há um limite entre o placar e entre bola e raquetes - tais elementos ultrapassam o placar de score
+    	 */
+    	//Limites para o Jogador 1 (RAQUETES)
+        if (raquete1.y < 75) raquete1.y = 75; 
+    
+        //Novo limite superior
+        if (raquete1.y > Game.height - raquete1.height)
+        	//Limite inferior
+            raquete1.y = Game.height - raquete1.height;
 
-        //Limites para o Jogador 2
-        if (p2.y < 0) p2.y = 0;      
-        if (p2.y > Game.height - p2.height)
-            p2.y = Game.height - p2.height;   
+        //Limites para o Jogador 2 (RAQUETES)
+        if (raquete2.y < 75) raquete2.y = 75; 
+        
+        if (raquete2.y > Game.height - raquete2.height)
+            raquete2.y = Game.height - raquete2.height; 
+    }
+
+    /*/
+     * METODO: verifica pontos marcados (SCORE)
+     */
+    private void checkScore(int player) {
+        if (player == 1) {
+            score1++;
+            if (score1 >= SCORE_LIMIT) {
+                endGame(1); //Jogador 1 venceu
+                return;
+            }
+        } else if (player == 2) {
+            score2++;
+            if (score2 >= SCORE_LIMIT) {
+                endGame(2); //Jogador 2 venceu
+                return;
+            }
+        }
+      //Reinicia a posição da bola
+        start(); 
     }
 
     /*
      * MÉTODO: Gerencia os limites e colisões da bola
      */
     private void limitsBall() {
-        int ballSize = 40; 
-
-        //Colisão direita + esquerda
-        if (ball.x + ballSize > Game.width) { 
-            score1++;
-            start();
-        }
+        int ballSize = 40;
         
+        //Colisão direita + esquerda (MARCADORES DE PONTOS)
+        if (ball.x + ballSize > Game.width) {
+            checkScore(1); 
+            return;
+        }
+
         if (ball.x < 0) {
-            score2++;
-            start();
+            checkScore(2); 
+            return;
         }
 
-        //Colisão inferior + superior
-        if (ball.y + ballSize > Game.height) movey = -Math.abs(movey); 
-        if (ball.y < 0) movey = Math.abs(movey); 
+        //Colisão inferior + superior (BOLA)
+        if (ball.y + ballSize > Game.height) {
+            ball.y = Game.height - ballSize;
+            movey = -Math.abs(movey); 
+        }
 
-        //Colisão com as raquetes
-        //jogador 1
-        if (ball.x <= p1.x + p1.width && ball.y + ballSize >= p1.y && ball.y <= p1.y + p1.height) {
-            ball.x = p1.x + p1.width; //evita ultrapassagem
-            movex = Math.abs(movex); //move direcao contraria
+        //Novo limite superior
+        if (ball.y < 60) { 
+            ball.y = 60;
+            movey = Math.abs(movey); 
         }
         
-        //jogador 2
-        if (ball.x + ballSize >= p2.x && ball.y + ballSize >= p2.y && ball.y <= p2.y + p2.height) {
-            ball.x = p2.x - ballSize; 
-            movex = -Math.abs(movex);
+        //Colisão com as raquetes 
+        if (ball.x <= raquete1.x + raquete1.width && ball.y + ballSize >= raquete1.y && ball.y <= raquete1.y + raquete1.height) {
+            ball.x = raquete1.x + raquete1.width;
+            movex = Math.abs(movex); 
+          
+            //Aumenta a velocidade da bola
+            increaseSpeed();
         }
-    }
 
-    /*
+        if (ball.x + ballSize >= raquete2.x && ball.y + ballSize >= raquete2.y && ball.y <= raquete2.y + raquete2.height) {
+            ball.x = raquete2.x - ballSize;
+            movex = -Math.abs(movex); 
+            increaseSpeed(); 
+        }
+
+    }
+    
+	/*
      * ESTILIZACAO DA TELA E ELEMENTOS
      */
     @Override
@@ -153,16 +210,19 @@ public class LevelState implements State {
         g.setFont(fontScore);
         g.setColor(new Color(224, 225, 221));
         
-        //tamanhos placar
-        g.drawString("Player 1:" + score1, Game.width / 4 - g.getFontMetrics().stringWidth("Player 1" + score1) / 2, 70);
-        g.drawString("Player 2: " + score2, Game.width * 3 / 4 - g.getFontMetrics().stringWidth("Player 2: " + score2) / 2, 70);
+        //Placar
+        g.drawString("Player 1:" + score1, Game.width / 4 - g.getFontMetrics().stringWidth("Player 1" + score1) / 2, 75);
+        g.drawString("Player 2: " + score2, Game.width * 3 / 4 - g.getFontMetrics().stringWidth("Player 2: " + score2) / 2, 75);
       
 
         //Linha vertical pontilhada - centro da tela
         g.setColor(new Color(65, 90, 119)); 
-        int dashHeight = 25; // Altura de cada linha
-        int gapHeight = 25;   // Altura do intervalo entre linhas
-        int lineThickness = 13; // Espessura da linha
+      //Altura de cada linha
+        int dashHeight = 25; 
+      //Altura do intervalo entre linhas
+        int gapHeight = 25;   
+      //Espessura da linha
+        int lineThickness = 13; 
         
         for (int y = 10; y < Game.height; y += dashHeight + gapHeight) {
         	 g.fillRect(Game.width / 2 - lineThickness / 2, y, lineThickness, dashHeight);
@@ -170,13 +230,30 @@ public class LevelState implements State {
 
         //Raquete do Jogador 1
         g.setColor(new Color(42, 157, 143)); //azul pastel
-        g.fillRect(p1.x, p1.y, p1.width, p1.height);
+        g.fillRect(raquete1.x, raquete1.y, raquete1.width, raquete1.height);
 
         //Raquete do Jogador 2
         g.setColor(new Color(231, 74, 81)); //vermelho pastel
-        g.fillRect(p2.x, p2.y, p2.width, p2.height);
+        g.fillRect(raquete2.x, raquete2.y, raquete2.width, raquete2.height);
+       
     }
+   
+    /*/
+     * METODO: fim de jogo + caixa de texto (GANHADOR)
+     */
+	private void endGame(int winner) {
+		JOptionPane.showMessageDialog(null, "Player " + winner + " venceu o jogo!", "Fim de Jogo", JOptionPane.INFORMATION_MESSAGE);
+		
+	    //Reseta dos placares
+	    score1 = 0;
+	    score2 = 0;
 
+	    //Voltar ao menu principal
+	    start();
+	    StateManager.setState(StateManager.MENU); 
+	}
+
+    
     @Override
     public void KeyPressed(int cod) {
     	
